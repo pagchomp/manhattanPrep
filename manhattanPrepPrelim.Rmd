@@ -1,0 +1,15 @@
+---
+title: "Manhattan Prep"
+author: "Brett Burk"
+output: 
+  pdf_document: 
+    number_sections: false
+    fig_height: 11
+    fig_width: 8.5
+geometry: margin=0.5in
+header-includes:
+  - \usepackage{graphicx}
+  - \usepackage{hyperref}
+  - \usepackage{xcolor}
+  - \usepackage{setspace}
+---
