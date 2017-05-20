@@ -13,3 +13,19 @@ header-includes:
   - \usepackage{xcolor}
   - \usepackage{setspace}
 ---
+
+why xls at all?
+
+```{r load-in}
+folder <- "E:\\Projects\\manhattanPrep\\"
+wf <- read.csv(paste0(folder, "GMATraw.csv"), stringsAsFactors = FALSE)
+head(wf)
+ques <- read.csv(paste0(folder, "GMATrawQues.csv"), stringsAsFactors = FALSE)
+names(wf) <- ques[,2]
+```
+
+Why so many blank columns in ques 1?
+
+```{r}
+table(wf$`Class recordings`)
+```
