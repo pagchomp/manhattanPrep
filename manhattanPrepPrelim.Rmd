@@ -22,10 +22,17 @@ wf <- read.csv(paste0(folder, "GMATraw.csv"), stringsAsFactors = FALSE)
 head(wf)
 ques <- read.csv(paste0(folder, "GMATrawQues.csv"), stringsAsFactors = FALSE)
 names(wf) <- ques[,2]
+nrow(wf)
 ```
 
-Why so many blank columns in ques 1?
+```{r light exploration}
+# Checking for repeat students
+sum(table(wf[,1]) >= 2)
 
-```{r}
-table(wf$`Class recordings`)
-```
+library(knitr)
+# Skip 1 for student ID
+for(i in 2:ncol(wf)){
+  cat('--------------------------------------------------------  \n')
+  cat(paste0(i, ". ", ques[i,2]))
+  print(table(wf[,i], exclude = NULL))
+}

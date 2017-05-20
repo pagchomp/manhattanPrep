@@ -3,3 +3,5 @@ GMATraw.xls
 *.csv
 GMATraw.xlsx
 ~$GMATraw.xlsx
+*.pdf
+codeSheet.xlsx
