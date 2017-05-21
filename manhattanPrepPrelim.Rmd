@@ -17,20 +17,34 @@ header-includes:
 why xls at all?
 
 ```{r load-in}
-
+library(pdftables)
 
 folder <- "E:\\Projects\\manhattanPrep\\"
-api.key <- read.table(paste0(folder, "convertAPIKey"))
+api.key <- read.table(paste0(folder, "convertAPIKey"), header = F)[[1]]
 wf <- read.csv(paste0(folder, "GMATraw.csv"), stringsAsFactors = FALSE)
 head(wf)
 ques <- read.csv(paste0(folder, "GMATrawQues.csv"), stringsAsFactors = FALSE)
 names(wf) <- ques[,2]
 nrow(wf)
-cs <- read.csv(paste0(folder, "CodeSheet.csv"), stringsAsFactors = FALSE)
+# convert_pdf(paste0(folder, "CodeSheet.pdf"), paste0(folder, "codesheetcsv.csv"), api_key = api.key)
+cs <- read.csv(paste0(folder, "codesheetcsv.csv"), skip = 2, stringsAsFactors = FALSE)
+print(ques[,2])
 ```
 
-```{r light exploration}
+2:10 are instruction based
+11:14 curriculum
+15:16 Facility
+17:23 Service
+24 is Overall experience
+25:26 corporate (26 Displays only if "Y" on #58)
+27:34 is co-instructor
+35 is Program Description
+36 Instructor Code
+37 Co-Instructor Code
+38 is Test Brand (all GMAT in this sample)
 
+
+```{r light exploration}
 
 # Checking for repeat students
 sum(table(wf[,1]) >= 2)
@@ -42,6 +56,27 @@ for(i in 2:ncol(wf)){
   cat(paste0(i, ". ", ques[i,2]))
   print(table(wf[,i], exclude = NULL))
 }
+```
 
-library(pdftables)
-convert_pdf(paste0(folder, "CodeSheet.pdf"), paste0(folder, "codesheetcsv.csv"), api_key = "")
+2:34 is 1:4
+25:26 is 0:1
+36 is Lead instructor code
+37 co instructor code
+
+
+```{r exploratio continues}
+for(i in 2:ncol(wf)){
+  cat('--------------------------------------------------------  \n')
+  cat(paste0(i, ". ", ques[i,2]))
+  print(mean(wf[,i], na.rm = T))
+}
+
+#program description--35
+aggregate(wf[,c(2:35)], by = list(wf$`Program Description`), FUN = mean, na.rm = T, na.action = NULL) 
+```
+
+
+rowmeans?
+
+PFGE: Poor/Fair/Good/Excellent
+CN/GN/GY/CY: Completely No/Generally No/Generally Yes/Completely Yes
