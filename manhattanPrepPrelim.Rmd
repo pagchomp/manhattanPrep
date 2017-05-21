@@ -17,15 +17,21 @@ header-includes:
 why xls at all?
 
 ```{r load-in}
+
+
 folder <- "E:\\Projects\\manhattanPrep\\"
+api.key <- read.table(paste0(folder, "convertAPIKey"))
 wf <- read.csv(paste0(folder, "GMATraw.csv"), stringsAsFactors = FALSE)
 head(wf)
 ques <- read.csv(paste0(folder, "GMATrawQues.csv"), stringsAsFactors = FALSE)
 names(wf) <- ques[,2]
 nrow(wf)
+cs <- read.csv(paste0(folder, "CodeSheet.csv"), stringsAsFactors = FALSE)
 ```
 
 ```{r light exploration}
+
+
 # Checking for repeat students
 sum(table(wf[,1]) >= 2)
 
@@ -36,3 +42,6 @@ for(i in 2:ncol(wf)){
   cat(paste0(i, ". ", ques[i,2]))
   print(table(wf[,i], exclude = NULL))
 }
+
+library(pdftables)
+convert_pdf(paste0(folder, "CodeSheet.pdf"), paste0(folder, "codesheetcsv.csv"), api_key = "")
