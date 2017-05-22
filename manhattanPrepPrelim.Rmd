@@ -14,21 +14,23 @@ header-includes:
   - \usepackage{setspace}
 ---
 
-why xls at all?
 
-```{r load-in}
+```{r load-in, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE}
 library(pdftables)
+library(knitr)
 
-folder <- "E:\\Projects\\manhattanPrep\\"
+folder <- "C:\\Users\\bmburk\\Dropbox\\manhattanPrep\\"
 api.key <- read.table(paste0(folder, "convertAPIKey"), header = F)[[1]]
 wf <- read.csv(paste0(folder, "GMATraw.csv"), stringsAsFactors = FALSE)
-head(wf)
+names(wf)[1] <- "SID"
+kable(head(wf)[,1:21], longtable = TRUE)
+kable(head(wf)[,22:38], longtable = TRUE)
 ques <- read.csv(paste0(folder, "GMATrawQues.csv"), stringsAsFactors = FALSE)
 names(wf) <- ques[,2]
 nrow(wf)
 # convert_pdf(paste0(folder, "CodeSheet.pdf"), paste0(folder, "codesheetcsv.csv"), api_key = api.key)
 cs <- read.csv(paste0(folder, "codesheetcsv.csv"), skip = 2, stringsAsFactors = FALSE)
-print(ques[,2])
+cat(paste(1:nrow(ques), ques[,2], " \n"))
 ```
 
 2:10 are instruction based
@@ -44,39 +46,98 @@ print(ques[,2])
 38 is Test Brand (all GMAT in this sample)
 
 
-```{r light exploration}
-
+```{r light exploration, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE}
 # Checking for repeat students
 sum(table(wf[,1]) >= 2)
 
 library(knitr)
 # Skip 1 for student ID
 for(i in 2:ncol(wf)){
-  cat('--------------------------------------------------------  \n')
-  cat(paste0(i, ". ", ques[i,2]))
-  print(table(wf[,i], exclude = NULL))
+  # cat("--------------------------------------------------------  \n")
+  cat(paste0(i, ". ", ques[i,2], " \n"))
+  curr.t <- as.data.frame(table(wf[,i], exclude = NULL))
+  new.t <- as.data.frame(t(curr.t$Freq))
+  names(new.t) <- curr.t$Var1
+  # 
+  print(kable(new.t))
+  cat(" \n")
 }
 ```
 
-2:34 is 1:4
-25:26 is 0:1
-36 is Lead instructor code
-37 co instructor code
+2:34 is 1:4  
+25:26 is 0:1  
+36 is Lead instructor code  
+37 co instructor code  
 
+```{r exploration continues, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE}
 
-```{r exploratio continues}
-for(i in 2:ncol(wf)){
-  cat('--------------------------------------------------------  \n')
-  cat(paste0(i, ". ", ques[i,2]))
-  print(mean(wf[,i], na.rm = T))
-}
+ques.df <- data.frame(Question = ques[,2], Mean = c(NA, colMeans(wf[,2:34], na.rm = T), rep(NA, 4)))
+
+print(kable(ques.df))
 
 #program description--35
-aggregate(wf[,c(2:35)], by = list(wf$`Program Description`), FUN = mean, na.rm = T, na.action = NULL) 
+agg.df <- aggregate(wf[,c(2:35)], by = list(wf$`Program Description`), FUN = mean, na.rm = T, na.action = NULL)
+agg.df <- as.data.frame(t(agg.df), stringsAsFactors = F)
+agg.df <- cbind(row.names(agg.df), agg.df)
+names(agg.df) <- agg.df[1,]
+agg.df <- agg.df[-1,]
+agg.df <- cbind(row.names(agg.df), agg.df)
+agg.df[,1] <- substr(agg.df[,1], 1, 30)
+row.names(agg.df) <- NULL
+agg.df <- agg.df[,-2]
+names(agg.df)[1] <- 'Question'
+
+print(kable(agg.df))
+
+wf[,c(2:24, 27:34)] <- sapply(wf[,c(2:24, 27:34)], function(x) as.numeric(as.character(x)))
+
+wf$means <- NA
+for(i in 1:nrow(wf)){
+  wf$means[i] <- mean(as.numeric(wf[i,c(2:24, 27:34)]), na.rm = T, na.action = NULL)
+}
+
+means.df <- summary(wf$means)
+means.df <- data.frame(t(unlist(lapply(1:6, function(x) means.df[[x]]))))
+names(means.df) <- names(summary(wf$means))
+
+print(kable(means.df))
+
+low.means <- wf[wf$means <= 3.476,]
+
+nrow(low.means)
+nrow(low.means)/nrow(wf)
+
+low.ques.df <- data.frame(Question = ques[,2], Mean = c(NA, colMeans(low.means[,2:34], na.rm = T), rep(NA, 4)))
 ```
 
 
-rowmeans?
+Now lets look at teachers
 
-PFGE: Poor/Fair/Good/Excellent
+```{r exploratio continues, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE}
+unique.codes <- unique(c(wf$`Lead Instructor Code`, wf$`Co-Instructor Code`))
+avgs <- numeric()
+for(uc in unique.codes){
+
+  ic <- wf[wf$`Lead Instructor Code` == uc | wf$`Co-Instructor Code` == uc,]
+  ques.df <- data.frame(Question = ques[,2], Mean = c(NA, colMeans(ic[,2:34], na.rm = T), rep(NA, 4)))
+  cat(" \n")
+  uc.avg <- round(mean(ques.df$Mean, na.rm = T), 2)
+  cat(paste('Instructor Code: \\textbf{', uc, "} AVG: \\textbf{", uc.avg,"} \n"))
+  avgs[length(avgs) + 1] <- uc.avg
+  
+  print(kable(ques.df))
+}
+
+means.df <- summary(avgs)
+means.df <- data.frame(t(unlist(lapply(1:6, function(x) means.df[[x]]))))
+names(means.df) <- names(summary(wf$means))
+print(kable(means.df))
+
+inst.df <- data.frame(Inst.Code = unique.codes, Avg = avgs)
+
+print(kable(inst.df[order(inst.df$Inst.Code),], row.names = FALSE))
+
+```
+
+PFGE: Poor/Fair/Good/Excellent  
 CN/GN/GY/CY: Completely No/Generally No/Generally Yes/Completely Yes
