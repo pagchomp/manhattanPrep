@@ -18,8 +18,8 @@ header-includes:
 ```{r load-in, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE}
 library(pdftables)
 library(knitr)
-
-folder <- "C:\\Users\\bmburk\\Dropbox\\manhattanPrep\\"
+folder <- "E:\\Projects\\manhattanPrep\\"
+# folder <- "C:\\Users\\bmburk\\Dropbox\\manhattanPrep\\"
 api.key <- read.table(paste0(folder, "convertAPIKey"), header = F)[[1]]
 wf <- read.csv(paste0(folder, "GMATraw.csv"), stringsAsFactors = FALSE)
 names(wf)[1] <- "SID"
