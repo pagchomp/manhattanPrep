@@ -122,22 +122,20 @@ for(uc in unique.codes){
   ques.df <- data.frame(Question = ques[,2], Mean = c(NA, colMeans(ic[,2:34], na.rm = T), rep(NA, 4)))
   cat(" \n")
   uc.avg <- round(mean(ques.df$Mean, na.rm = T), 2)
-  # cat(paste('Instructor Code: \\textbf{', uc, "} AVG: \\textbf{", uc.avg,"} \n"))
+  cat(paste('Instructor Code: \\textbf{', uc, "} AVG: \\textbf{", uc.avg,"} \n"))
   avgs[length(avgs) + 1] <- uc.avg
   
-  
-  
-  # print(kable(ques.df))
+  print(kable(ques.df))
 }
 
 means.df <- summary(avgs)
 means.df <- data.frame(t(unlist(lapply(1:6, function(x) means.df[[x]]))))
 names(means.df) <- names(summary(wf$means))
-# print(kable(means.df))
+print(kable(means.df))
 
 inst.df <- data.frame(Inst.Code = unique.codes, Avg = avgs)
 
-# print(kable(inst.df[order(inst.df$Inst.Code),], row.names = FALSE))
+print(kable(inst.df[order(inst.df$Inst.Code),], row.names = FALSE))
 
 ```
 
