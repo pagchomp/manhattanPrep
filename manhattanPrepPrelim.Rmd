@@ -52,6 +52,7 @@ sum(table(wf[,1]) >= 2)
 
 library(knitr)
 # Skip 1 for student ID
+quart.df <- data.frame(first = numeric(), second = numeric(), third = numeric(), fourth = numeric())
 for(i in 2:ncol(wf)){
   # cat("--------------------------------------------------------  \n")
   cat(paste0(i, ". ", ques[i,2], " \n"))
