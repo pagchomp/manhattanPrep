@@ -1,7 +1,8 @@
 library(shiny)
 library(shinythemes)
 # Load in the data
-folder <- "E:\\Projects\\manhattanPrep\\"
+# folder <- "E:\\Projects\\manhattanPrep\\"
+folder <- ""
 wf <- read.csv(paste0(folder, "cleanedManhattan.csv"), stringsAsFactors = FALSE)
 # Fix so the numbers are ordered correctly
 wf$Instructor <- as.numeric(wf$Instructor)
@@ -10,7 +11,7 @@ wf <- wf[order(wf$Instructor),]
 fluidPage(
   # Set The theme color
   theme = shinytheme("cyborg"),
-  
+  titlePanel("Manhattan Prep Demo"),
   # Create the page
   pageWithSidebar(
     # Add Manhattan Prep logo

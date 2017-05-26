@@ -1,0 +1,11 @@
+name: manhattanPrep
+title: manhattanPrep
+account: burkdatascience
+server: shinyapps.io
+appId: 183752
+bundleId: 841208
+url: https://burkdatascience.shinyapps.io/manhattanPrep/
+when: 1495759682.29839
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .gitattributes|cleanup.R|CodeSheet.csv|CodeSheet.pdf|codeSheet.xlsx|codesheetcsv.csv|convertAPIKey|gmatData.csv|GMATraw.csv|GMATraw.xls|GMATraw.xlsx|manhattanPrepPrelim.pdf|manhattanPrepPrelim.Rmd
