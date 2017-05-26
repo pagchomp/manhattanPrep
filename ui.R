@@ -1,21 +1,32 @@
 library(shiny)
+library(shinythemes)
 # Load in the data
 folder <- "E:\\Projects\\manhattanPrep\\"
 wf <- read.csv(paste0(folder, "cleanedManhattan.csv"), stringsAsFactors = FALSE)
-shinyUI(pageWithSidebar(
+# Fix so the numbers are ordered correctly
+wf$Instructor <- as.numeric(wf$Instructor)
+wf <- wf[order(wf$Instructor),]
+
+fluidPage(
+  # Set The theme color
+  theme = shinytheme("cyborg"),
   
-  headerPanel("Instructor Results"),
-  sidebarPanel(
-    selectInput("code", 
-                "Choose an Instructor Code:",
-                choices = names(table(wf$Instructor)), 
-                selected = "95"),
-    submitButton("Update"),
-    h5("Choose an Instructor to see their results.")
+  # Create the page
+  pageWithSidebar(
+    # Add Manhattan Prep logo
+    headerPanel(img(src = 'logo.png', align = "center")),
+    # Create the sidebar selector for each instructor
+    sidebarPanel(
+      selectInput("code", 
+                  "Instructor Code:",
+                  choices = names(table(wf$Instructor)), 
+                  selected = "95"),
+      submitButton("Update"),
+      h5("Choose an Instructor to see their results.")
   ),
-  
-  # Show a plot of the generated distribution
-  mainPanel(
-    plotOutput("barPlot", height="800px")
+  # Show the plot
+    mainPanel(
+      plotOutput("barPlot", height="800px")
+    )
   )
-))
+)

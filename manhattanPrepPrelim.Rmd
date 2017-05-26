@@ -33,17 +33,17 @@ cs <- read.csv(paste0(folder, "codesheetcsv.csv"), skip = 2, stringsAsFactors = 
 cat(paste(1:nrow(ques), ques[,2], " \n"))
 ```
 
-2:10 are instruction based
-11:14 curriculum
-15:16 Facility
-17:23 Service
-24 is Overall experience
-25:26 corporate (26 Displays only if "Y" on #58)
-27:34 is co-instructor
-35 is Program Description
-36 Instructor Code
-37 Co-Instructor Code
-38 is Test Brand (all GMAT in this sample)
+2:10 are instruction based  
+11:14 curriculum  
+15:16 Facility  
+17:23 Service  
+24 is Overall experience  
+25:26 corporate (26 Displays only if "Y" on #58)  
+27:34 is co-instructor  
+35 is Program Description  
+36 Instructor Code  
+37 Co-Instructor Code  
+38 is Test Brand (all GMAT in this sample)  
 
 
 ```{r light exploration, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE}
@@ -54,12 +54,18 @@ library(knitr)
 # Skip 1 for student ID
 
 for(i in 2:ncol(wf)){
-  # cat("--------------------------------------------------------  \n")
-  cat(paste0(i, ". ", ques[i,2], " \n"))
   curr.t <- as.data.frame(table(wf[,i], exclude = NULL))
   new.t <- as.data.frame(t(curr.t$Freq))
   names(new.t) <- curr.t$Var1
-  # 
+  if(i <= 34){
+  new.m <- sum(as.numeric(as.character(curr.t[,1])) * 
+        as.numeric(as.character(curr.t[,2])), na.rm = T) / 
+    sum(as.numeric(as.character(curr.t$Freq[!is.na(curr.t$Var1)])), na.rm = T)
+  new.m <- paste0(" Mean: ", round(new.m, 2))
+  } else {
+    new.m <- ""
+  }
+  cat(paste0(i, ". ", ques[i,2], new.m, " \n"))
   print(kable(new.t))
   cat(" \n")
 }
@@ -71,12 +77,10 @@ for(i in 2:ncol(wf)){
 37 co instructor code  
 
 ```{r exploration continues, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE}
-
 ques.df <- data.frame(Question = ques[,2], Mean = c(NA, colMeans(wf[,2:34], na.rm = T), rep(NA, 4)))
 
 print(kable(ques.df))
 
-#program description--35
 agg.df <- aggregate(wf[,c(2:35)], by = list(wf$`Program Description`), FUN = mean, na.rm = T, na.action = NULL)
 agg.df <- as.data.frame(t(agg.df), stringsAsFactors = F)
 agg.df <- cbind(row.names(agg.df), agg.df)
@@ -111,10 +115,9 @@ nrow(low.means)/nrow(wf)
 low.ques.df <- data.frame(Question = ques[,2], Mean = c(NA, colMeans(low.means[,2:34], na.rm = T), rep(NA, 4)))
 ```
 
+Instructors?
 
-Now lets look at teachers
-
-```{r exploratio continues, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE}
+```{r final exploration, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE}
 unique.codes <- unique(c(wf$`Lead Instructor Code`, wf$`Co-Instructor Code`))
 avgs <- numeric()
 for(uc in unique.codes){
