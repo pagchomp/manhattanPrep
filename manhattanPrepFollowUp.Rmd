@@ -1,0 +1,100 @@
+---
+title: "Manhattan Prep"
+author: "Brett Burk"
+output: 
+  pdf_document: 
+    number_sections: false
+    fig_height: 11
+    fig_width: 8.5
+geometry: margin=0.5in
+header-includes:
+  - \usepackage{graphicx}
+  - \usepackage{hyperref}
+  - \usepackage{xcolor}
+  - \usepackage{setspace}
+---
+
+
+```{r load-in, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE}
+library(pdftables)
+library(knitr)
+folder <- "E:\\Projects\\manhattanPrep\\"
+# folder <- "C:\\Users\\bmburk\\Dropbox\\manhattanPrep\\"
+api.key <- read.table(paste0(folder, "convertAPIKey"), header = F)[[1]]
+wf <- read.csv(paste0(folder, "GMATraw.csv"), stringsAsFactors = FALSE)
+names(wf)[1] <- "SID"
+ques <- read.csv(paste0(folder, "GMATrawQues.csv"), stringsAsFactors = FALSE)
+names(wf) <- ques[,2]
+# convert_pdf(paste0(folder, "CodeSheet.pdf"), paste0(folder, "codesheetcsv.csv"), api_key = api.key)
+cs <- read.csv(paste0(folder, "codesheetcsv.csv"), skip = 2, stringsAsFactors = FALSE)
+```
+
+All based around question #2
+
+```{r light exploration, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE}
+print(table(wf$`How would you rate your overall learning experience with Manhattan Prep?`))
+lowest.rating <- subset(wf, wf$`How would you rate your overall learning experience with Manhattan Prep?` <= 2)
+higher.rating <- subset(wf, wf$`How would you rate your overall learning experience with Manhattan Prep?` > 2)
+rating.df <- data.frame(overall = colMeans(wf[,2:34], na.rm = T), lowest = colMeans(lowest.rating[,2:34], na.rm = T), highest = colMeans(higher.rating[,2:34], na.rm = T))
+
+rating.df$high.low.diffs <- rating.df$highest - rating.df$lowest
+
+colMeans(rating.df)
+apply(rating.df, 2, sd)
+
+rating.df <- data.frame(question = substr(row.names(rating.df), 1, 30), rating.df)
+row.names(rating.df) <- NULL
+
+
+biggest.diff <- subset(rating.df, rating.df$high.low.diffs >= mean(rating.df$high.low.diffs) + sd(rating.df$high.low.diffs))
+kable(biggest.diff)
+smallest.diff <- subset(rating.df, rating.df$high.low.diffs <= mean(rating.df$high.low.diffs) - sd(rating.df$high.low.diffs))
+kable(smallest.diff)
+rating.df$overall.low.diffs <- rating.df$overall - rating.df$lowest
+kable(rating.df)
+```
+
+has co-instructor?
+
+26-33 'co'
+
+removal of class recordings due ot edge cases
+```{r model building, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE}
+temp.wf <-  wf[,-c(1, 11, 24:38)]
+temp.wf$'Has Coinstructor' <- ifelse(is.na(wf$`Co-Instructor Code`), 0, 1)
+names(temp.wf)[1] <- 'y'
+model1 <- lm(y ~ ., data = temp.wf)
+quantile(summary(model1)$residuals)
+summary(model1)$r.squared
+summary(model1)$adj.r.squared
+kable(data.frame(model1$coefficients))
+plot(model1)
+```
+
+`Cares about my success`                                        0.120413   0.037837   3.182  0.00153 ** 
+`How would you rate [InstructorFirstName]'s teaching overall?`  0.361658   0.068634   5.269 1.87e-07 ***
+`Would you recommend [InstructorFirstName]?`                    0.169364   0.056115   3.018  0.00264 ** 
+`Course slides`                                                 0.075334   0.028940   2.603  0.00945 ** 
+Books                                                           0.160086   0.035457   4.515 7.54e-06 ***
+`Online materials`                                              0.086097   0.033253   2.589  0.00984 ** 
+`Guidance on enrollment options`                                0.087332   0.039704   2.200  0.02819 *  
+`Payment & billing services`                                    0.098908   0.047544   2.080  0.03789 * 
+
+
+```{r model tuning, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE}
+temp.wf2 <-  temp.wf[,c(1, 7:12, 16:17)]
+model2 <- lm(y ~ ., data = temp.wf2)
+quantile(summary(model2)$residuals)
+summary(model2)$r.squared
+summary(model2)$adj.r.squared
+kable(data.frame(model2$coefficients))
+plot(model2)
+anova(model2)
+```
+
+
+    Promoters (score 9-10) are loyal enthusiasts who will keep buying and refer others, fueling growth.
+    Passives (score 7-8) are satisfied but unenthusiastic customers who are vulnerable to competitive offerings.
+    Detractors (score 0-6) are unhappy customers who can damage your brand and impede growth through negative word-of-mouth.
+
+Subtracting the percentage of Detractors from the percentage of Promoters yields the Net Promoter Score
