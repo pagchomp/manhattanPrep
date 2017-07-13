@@ -1,0 +1,132 @@
+<style type="text/css">
+
+body, td {
+   font-size: 14px;
+}
+code.r{
+  font-size: 14px;
+}
+pre {
+  font-size: 14px
+}
+</style>
+
+Manhattan Prep Presentation
+Manhattan Prep
+========================================================
+author: Brett Burk
+date: 2017-07-14
+autosize: true
+
+Getting started
+========================================================
+
+R used for the load-in and analysis. All files (including this one) are on https://github.com/pagchomp/manhattanPrep
+<small style="font-size:.3em">
+```{r load-in, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE}
+
+library(reshape2)
+folder <- "E:\\Projects\\manhattanPrep\\"
+# folder <- "C:\\Users\\bmburk\\Dropbox\\Projects\\manhattanPrep\\"
+# Load in
+wf <- read.csv(paste0(folder, "GMATraw.csv"), stringsAsFactors = FALSE)
+ques <- read.csv(paste0(folder, "GMATrawQues.csv"), stringsAsFactors = FALSE)
+names(wf)[1] <- "SID"
+names(wf) <- ques[,2]
+
+# Create df for instructors
+inst.df <- data.frame(Question = ques[2:24,2])
+
+# Get unique codes
+unique.codes <- unique(c(wf$`Lead Instructor Code`, wf$`Co-Instructor Code`))
+# Create avgs vector
+avgs <- numeric()
+# Fill inst.df
+for(uc in unique.codes){
+  ic <- wf[wf$`Lead Instructor Code` == uc | wf$`Co-Instructor Code` == uc,]
+  inst.df <- data.frame(inst.df, Mean = round(colMeans(ic[,2:24], na.rm = T), 3))
+  names(inst.df)[ncol(inst.df)] <- uc
+}
+
+# R insists on adding X to the beginning of column names
+colnames(inst.df) <- gsub("^X", "",  colnames(inst.df))
+
+# Rotate and change names
+inst.df <- data.frame(t(inst.df))
+names(inst.df) <- ques[2:24,2]
+inst.df <- inst.df[-1,]
+
+# 
+inst.df <- data.frame(instCode = row.names(inst.df), inst.df, stringsAsFactors = F, check.names = F)
+
+inst.df <- melt(inst.df, id.vars = "instCode")
+names(inst.df) <- c("Instructor", "Questions", "Means")
+
+# Write data frame
+write.csv(inst.df, paste0(folder, "cleanedManhattan.csv"), row.names = F)
+
+# Create mean scores df and write it
+ms.df <- data.frame(Question = ques[2:24,2], Mean = colMeans(wf[,2:24], na.rm = T))
+ms.df[,3] <- ms.df[,2]
+ms.df[,2] <- ms.df[,1]
+ms.df[,1] <- NA
+ms.df <- cbind(ms.df, 'Mean')
+names(ms.df) <- c("Instructor", "Questions", "Means", "Type")
+write.csv(ms.df, paste0(folder, "meanScores.csv"), row.names = F)
+```
+</small>
+
+Means exploration
+========================================================
+
+```{r light exploration, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
+library(pdftables)
+library(knitr)
+
+api.key <- read.table(paste0(folder, "convertAPIKey"), header = F)[[1]]
+wf <- read.csv(paste0(folder, "GMATraw.csv"), stringsAsFactors = FALSE)
+names(wf)[1] <- "SID"
+ques <- read.csv(paste0(folder, "GMATrawQues.csv"), stringsAsFactors = FALSE)
+names(wf) <- ques[,2]
+# convert_pdf(paste0(folder, "CodeSheet.pdf"), paste0(folder, "codesheetcsv.csv"), api_key = api.key)
+cs <- read.csv(paste0(folder, "codesheetcsv.csv"), skip = 2, stringsAsFactors = FALSE)
+
+for(i in 2:4){
+  curr.t <- as.data.frame(table(wf[,i], exclude = NULL))
+  new.t <- as.data.frame(t(curr.t$Freq))
+  names(new.t) <- curr.t$Var1
+  if(i <= 34){
+  new.m <- sum(as.numeric(as.character(curr.t[,1])) * 
+        as.numeric(as.character(curr.t[,2])), na.rm = T) / 
+    sum(as.numeric(as.character(curr.t$Freq[!is.na(curr.t$Var1)])), na.rm = T)
+  new.m <- paste0(" MEAN: ", round(new.m, 2))
+  } else {
+    new.m <- ""
+  }
+  cat(paste0(ques[i,2], new.m, " \n"))
+  print(kable(new.t))
+  cat(" \n")
+}
+```
+
+Mean Scores for each question
+========================================================
+<small style="font-size:.5em">
+
+```{r means df, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
+ques.df <- data.frame(Question = ques[,2], Mean = c(NA, colMeans(wf[,2:34], na.rm = T), rep(NA, 4)))
+print(kable(ques.df[2:18,]))
+```
+
+***
+
+<br>
+<br>
+<br>
+
+```{r means df 2, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
+ques.df <- data.frame(Question = ques[,2], Mean = c(NA, colMeans(wf[,2:34], na.rm = T), rep(NA, 4)))
+
+print(kable(ques.df[19:34,]))
+```
+</small>

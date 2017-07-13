@@ -19,7 +19,7 @@ header-includes:
 library(pdftables)
 library(knitr)
 folder <- "E:\\Projects\\manhattanPrep\\"
-# folder <- "C:\\Users\\bmburk\\Dropbox\\manhattanPrep\\"
+# folder <- "C:\\Users\\bmburk\\Dropbox\\Projects\\manhattanPrep\\"
 api.key <- read.table(paste0(folder, "convertAPIKey"), header = F)[[1]]
 wf <- read.csv(paste0(folder, "GMATraw.csv"), stringsAsFactors = FALSE)
 names(wf)[1] <- "SID"
