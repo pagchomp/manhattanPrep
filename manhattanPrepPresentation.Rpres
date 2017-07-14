@@ -1,22 +1,10 @@
-<style type="text/css">
-
-body, td {
-   font-size: 14px;
-}
-code.r{
-  font-size: 14px;
-}
-pre {
-  font-size: 14px
-}
-</style>
-
-Manhattan Prep Presentation
+Manhattan Prep Presentation: Brett Burk 2017/07/13
 Manhattan Prep
 ========================================================
 author: Brett Burk
 date: 2017-07-14
-autosize: true
+width: 1440
+height: 900
 
 Getting started
 ========================================================
@@ -76,7 +64,7 @@ write.csv(ms.df, paste0(folder, "meanScores.csv"), row.names = F)
 ```
 </small>
 
-Means exploration
+Means Exploration
 ========================================================
 
 ```{r light exploration, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
@@ -109,7 +97,7 @@ for(i in 2:4){
 }
 ```
 
-Mean Scores for each question
+Mean Scores for Each Question
 ========================================================
 <small style="font-size:.5em">
 
@@ -130,3 +118,335 @@ ques.df <- data.frame(Question = ques[,2], Mean = c(NA, colMeans(wf[,2:34], na.r
 print(kable(ques.df[19:34,]))
 ```
 </small>
+
+
+Aggregate by Course Type
+========================================================
+<small style="font-size:.5em">
+
+```{r agg df, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
+agg.df <- aggregate(wf[,c(2:35)], by = list(wf$`Program Description`), FUN = mean, na.rm = T, na.action = NULL)
+agg.df <- as.data.frame(t(agg.df), stringsAsFactors = F)
+agg.df <- cbind(row.names(agg.df), agg.df)
+names(agg.df) <- agg.df[1,]
+agg.df <- agg.df[-1,]
+agg.df <- cbind(row.names(agg.df), agg.df)
+agg.df[,1] <- substr(agg.df[,1], 1, 30)
+row.names(agg.df) <- NULL
+agg.df <- agg.df[,-2]
+names(agg.df)[1] <- 'Question'
+agg.df[,2:7] <- round(sapply(agg.df[,2:7], as.numeric), 2)
+
+print(kable(agg.df[1:19,], row.names = F))
+```
+
+***
+
+<br>
+<br>
+<br>
+
+```{r agg df 2, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
+ques.df <- data.frame(Question = ques[,2], Mean = c(NA, colMeans(wf[,2:34], na.rm = T), rep(NA, 4)))
+
+print(kable(agg.df[20:34,], row.names = F))
+```
+</small>
+
+Average Score Per Student
+========================================================
+
+```{r avg score, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
+wf[,c(2:24, 27:34)] <- sapply(wf[,c(2:24, 27:34)], function(x) as.numeric(as.character(x)))
+
+wf$means <- NA
+for(i in 1:nrow(wf)){
+  wf$means[i] <- mean(as.numeric(wf[i,c(2:24, 27:34)]), na.rm = T, na.action = NULL)
+}
+
+means.df <- summary(wf$means)
+means.df <- data.frame(t(unlist(lapply(1:6, function(x) means.df[[x]]))))
+names(means.df) <- names(summary(wf$means))
+
+print(kable(means.df))
+```
+
+
+Average Score by Instructor Code
+========================================================
+```{r Instr Score, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
+unique.codes <- unique(c(wf$`Lead Instructor Code`, wf$`Co-Instructor Code`))
+avgs <- numeric()
+for(uc in unique.codes){
+  ic <- wf[wf$`Lead Instructor Code` == uc | wf$`Co-Instructor Code` == uc,]
+  ques.df <- data.frame(Question = ques[,2], Mean = c(NA, colMeans(ic[,2:34], na.rm = T), rep(NA, 4)))
+  uc.avg <- round(mean(ques.df$Mean, na.rm = T), 2)
+  avgs[length(avgs) + 1] <- uc.avg
+}
+
+means.df <- summary(avgs)
+means.df <- data.frame(t(unlist(lapply(1:6, function(x) means.df[[x]]))))
+names(means.df) <- names(summary(wf$means))
+print(kable(means.df))
+```
+
+Instructor 69?
+
+https://burkdatascience.shinyapps.io/manhattanPrep/
+
+
+Frequency of Responses
+========================================================
+```{r nps load-in, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
+library(pander)
+wf <- read.csv(paste0(folder, "GMATraw.csv"), stringsAsFactors = FALSE)
+names(wf)[1] <- "SID"
+ques <- read.csv(paste0(folder, "GMATrawQues.csv"), stringsAsFactors = FALSE)
+names(wf) <- gsub("InstructorFirstName", "name", ques[,2])
+cs <- read.csv(paste0(folder, "codesheetcsv.csv"), skip = 2, stringsAsFactors = FALSE)
+
+t.df <- data.frame(table(wf$`How would you rate your overall learning experience with Manhattan Prep?`))
+t.df$Pct <- round((t.df$Freq/sum(t.df$Freq)) * 100, 2)
+kable(t.df)
+```
+
+High and Low scores
+========================================================
+'Low' is <= 2  
+'High' is > 2
+<small style="font-size:.55em">
+```{r high low, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
+lowest.rating <- subset(wf, 
+                    wf$`How would you rate your overall learning experience with Manhattan Prep?` <= 2)
+higher.rating <- subset(wf, 
+                    wf$`How would you rate your overall learning experience with Manhattan Prep?` > 2)
+rating.df <- data.frame(overall = colMeans(wf[,2:34], na.rm = T), 
+                        lowest = colMeans(lowest.rating[,2:34], na.rm = T), 
+                        highest = colMeans(higher.rating[,2:34], na.rm = T))
+
+rating.df$high.low.diffs <- rating.df$highest - rating.df$lowest
+
+rating.df <- data.frame(question = substr(row.names(rating.df), 1, 30), rating.df)
+row.names(rating.df) <- NULL
+biggest.diff <- subset(rating.df, rating.df$high.low.diffs >= mean(rating.df$high.low.diffs) + 
+                         sd(rating.df$high.low.diffs))
+smallest.diff <- subset(rating.df, rating.df$high.low.diffs <= mean(rating.df$high.low.diffs) - 
+                         sd(rating.df$high.low.diffs))
+rating.df$overall.low.diffs <- rating.df$overall - rating.df$lowest
+
+rating.df[,2:6] <- round(sapply(rating.df[,2:6], as.numeric), 2)
+
+kable(rating.df[1:17,], row.names = F)
+```
+
+***
+
+<br>
+<br>
+
+```{r high low 2, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
+kable(rating.df[18:33,], row.names = F)
+```
+</small>
+
+Communicates Effectively = 0.85  
+Cares about my success = 0.89  
+Course slides = 0.87  
+Guidance on enrollment options = 0.89  
+
+
+Linear model
+========================================================
+
+```{r model 1, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
+temp.wf <-  wf[,-c(1, 11, 24:38)]
+temp.wf$'Has Coinstructor' <- ifelse(is.na(wf$`Co-Instructor Code`), 0, 1)
+names(temp.wf)[1] <- 'y'
+model1 <- lm(y ~ ., data = temp.wf)
+cat('R^2', summary(model1)$r.squared, '<br>')
+cat('Adjusted R^2', summary(model1)$adj.r.squared)
+```
+
+
+
+***
+<small style="font-size:.75em">
+```{r model 1 coef, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
+coef.df <- data.frame(summary(model1)$coefficients[,c(1,4)])
+names(coef.df) <- c('Coefficient', 'P-Value')
+coef.df <- round(coef.df, 3)
+kable(coef.df)
+
+```
+</small>
+
+Linear model 2
+========================================================
+```{r model 2, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
+temp.wf2 <-  temp.wf[,c(1, 7, 10:12, 16:17)]
+model2 <- lm(y ~ ., data = temp.wf2)
+cat('R^2', summary(model2)$r.squared, '<br>')
+cat('Adjusted R^2', summary(model2)$adj.r.squared)
+```
+
+<small style="font-size:.85em">
+```{r model 2 coef, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
+coef.df <- data.frame(summary(model2)$coefficients[,c(1,4)])
+names(coef.df) <- c('Coefficient', 'P-Value')
+coef.df <- round(coef.df, 3)
+kable(coef.df)
+```
+ 
+***
+```{r model 2 anova, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
+anova.df <- anova(model2)
+anova.df <- round(anova.df, 3)
+
+kable(anova.df)
+```
+</small>
+
+Net Promoter Score
+========================================================
+
+Using "How would you rate your overall learning experience with Manhattan Prep?"
+
++ Promoters (score 9-10) are loyal enthusiasts who will keep buying and refer others, fueling growth. Here they are 4s.
++ Passives (score 7-8) are satisfied but unenthusiastic customers who are vulnerable to competitive offerings. Here they are 3s.
++ Detractors (score 0-6) are unhappy customers who can damage your brand and impede growth through negative word-of-mouth. Here they are 2s and 1s.
+
+Net Promoter Score Individual Questions
+========================================================
+```{r nps continued, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
+
+wf2 <- wf
+wf2[,2][wf2[,2] == 4] <- 'Prom'
+wf2[,2][wf2[,2] == 3] <- 'Pass'
+wf2[,2][wf2[,2] <= 2] <- 'Detr'
+wf2 <- wf2[!is.na(wf2$`How would you rate your overall learning experience with Manhattan Prep?`),]
+total.wf2 <- sum(table(wf2[,2]))
+wf2.pcts <- round((table(wf2[,2])/total.wf2) * 100, 2)
+
+net.promoter <- (wf2.pcts[3] - wf2.pcts[1])[[1]]
+
+detr <- wf2[wf2[,2] == 'Detr',]
+pass <- wf2[wf2[,2] == 'Pass',]
+prom <- wf2[wf2[,2] == 'Prom',]
+
+for(curr.col in c(24, 35)){
+  if(exists("joined.df")) remove(joined.df)
+  for(type.resp in unique(wf2[,2])){
+    temp <- wf2[wf2[,2] == type.resp,]
+    temp.df <- data.frame(table(temp[,curr.col]), stringsAsFactors = F)
+    temp.df$Pct <- round((temp.df$Freq/sum(temp.df$Freq)) * 100, 2)
+    names(temp.df)[2:ncol(temp.df)] <- paste(type.resp, names(temp.df[2:ncol(temp.df)]))
+    cat("  \n  ")
+    if(exists("joined.df")){
+      joined.df <- data.frame(merge(joined.df, temp.df, by = "Var1", all = TRUE), stringsAsFactors = F)
+    } else {
+      joined.df <- temp.df
+    }
+  }
+  names(joined.df)[1] <- "V1"
+  
+  joined.df <- joined.df[order(as.character(joined.df[,1])),]
+  joined.df <- rbind(joined.df, 
+                     data.frame(t(c('SUM', colSums(joined.df[,2:7], na.rm = T))))
+                     )
+  
+  cat(names(wf2)[curr.col])
+  print(kable(joined.df, row.names = FALSE))
+}
+
+```
+
+Net Promoter Score Individual Questions Continued
+========================================================
+```{r nps continued 2, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
+
+for(curr.col in c(4, 5)){
+  if(exists("joined.df")) remove(joined.df)
+  for(type.resp in unique(wf2[,2])){
+    temp <- wf2[wf2[,2] == type.resp,]
+    temp.df <- data.frame(table(temp[,curr.col]), stringsAsFactors = F)
+    temp.df$Pct <- round((temp.df$Freq/sum(temp.df$Freq)) * 100, 2)
+    names(temp.df)[2:ncol(temp.df)] <- paste(type.resp, names(temp.df[2:ncol(temp.df)]))
+    cat("  \n  ")
+    if(exists("joined.df")){
+      joined.df <- data.frame(merge(joined.df, temp.df, by = "Var1", all = TRUE), stringsAsFactors = F)
+    } else {
+      joined.df <- temp.df
+    }
+  }
+  names(joined.df)[1] <- "V1"
+  
+  joined.df <- joined.df[order(as.character(joined.df[,1])),]
+  joined.df <- rbind(joined.df, 
+                     data.frame(t(c('SUM', colSums(joined.df[,2:7], na.rm = T))))
+                     )
+  
+  cat(names(wf2)[curr.col])
+  print(kable(joined.df, row.names = FALSE))
+}
+```
+
+Net Promoter Score Individual Questions Continued
+========================================================
+```{r nps continued 3, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
+
+for(curr.col in c(8, 12)){
+  if(exists("joined.df")) remove(joined.df)
+  for(type.resp in unique(wf2[,2])){
+    temp <- wf2[wf2[,2] == type.resp,]
+    temp.df <- data.frame(table(temp[,curr.col]), stringsAsFactors = F)
+    temp.df$Pct <- round((temp.df$Freq/sum(temp.df$Freq)) * 100, 2)
+    names(temp.df)[2:ncol(temp.df)] <- paste(type.resp, names(temp.df[2:ncol(temp.df)]))
+    cat("  \n  ")
+    if(exists("joined.df")){
+      joined.df <- data.frame(merge(joined.df, temp.df, by = "Var1", all = TRUE), stringsAsFactors = F)
+    } else {
+      joined.df <- temp.df
+    }
+  }
+  names(joined.df)[1] <- "V1"
+  
+  joined.df <- joined.df[order(as.character(joined.df[,1])),]
+  joined.df <- rbind(joined.df, 
+                     data.frame(t(c('SUM', colSums(joined.df[,2:7], na.rm = T))))
+                     )
+  
+  cat(names(wf2)[curr.col])
+  print(kable(joined.df, row.names = FALSE))
+}
+```
+
+
+Net Promoter Score Individual Questions Continued
+========================================================
+```{r nps continued 4 n, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
+
+for(curr.col in c(18, 23)){
+  if(exists("joined.df")) remove(joined.df)
+  for(type.resp in unique(wf2[,2])){
+    temp <- wf2[wf2[,2] == type.resp,]
+    temp.df <- data.frame(table(temp[,curr.col]), stringsAsFactors = F)
+    temp.df$Pct <- round((temp.df$Freq/sum(temp.df$Freq)) * 100, 2)
+    names(temp.df)[2:ncol(temp.df)] <- paste(type.resp, names(temp.df[2:ncol(temp.df)]))
+    cat("  \n  ")
+    if(exists("joined.df")){
+      joined.df <- data.frame(merge(joined.df, temp.df, by = "Var1", all = TRUE), stringsAsFactors = F)
+    } else {
+      joined.df <- temp.df
+    }
+  }
+  names(joined.df)[1] <- "V1"
+  
+  joined.df <- joined.df[order(as.character(joined.df[,1])),]
+  joined.df <- rbind(joined.df, 
+                     data.frame(t(c('SUM', colSums(joined.df[,2:7], na.rm = T))))
+                     )
+  
+  cat(names(wf2)[curr.col])
+  print(kable(joined.df, row.names = FALSE))
+}
+```
