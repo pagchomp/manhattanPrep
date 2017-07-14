@@ -9,7 +9,8 @@ height: 900
 Getting started
 ========================================================
 
-R used for the load-in and analysis. All files (including this one) are on https://github.com/pagchomp/manhattanPrep
+R used for the load-in and analysis.  
+All files (including this one) are on https://github.com/pagchomp/manhattanPrep
 <small style="font-size:.3em">
 ```{r load-in, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE}
 
@@ -87,7 +88,7 @@ for(i in 2:4){
   new.m <- sum(as.numeric(as.character(curr.t[,1])) * 
         as.numeric(as.character(curr.t[,2])), na.rm = T) / 
     sum(as.numeric(as.character(curr.t$Freq[!is.na(curr.t$Var1)])), na.rm = T)
-  new.m <- paste0(" MEAN: ", round(new.m, 2))
+  new.m <- paste0(" <br> Mean: <b>", round(new.m, 2), "</b>")
   } else {
     new.m <- ""
   }
@@ -99,16 +100,19 @@ for(i in 2:4){
 
 Mean Scores for Each Question
 ========================================================
-<small style="font-size:.5em">
+<small style="font-size:.7em">
 
 ```{r means df, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
 ques.df <- data.frame(Question = ques[,2], Mean = c(NA, colMeans(wf[,2:34], na.rm = T), rep(NA, 4)))
 print(kable(ques.df[2:18,]))
 ```
 
+3 Knows [Test] content 3.924300  
+7 Is enthusiastic 3.853899  
+27 Knows GMAT content(co) 3.8495575  
+
 ***
 
-<br>
 <br>
 <br>
 
@@ -117,6 +121,11 @@ ques.df <- data.frame(Question = ques[,2], Mean = c(NA, colMeans(wf[,2:34], na.r
 
 print(kable(ques.df[19:34,]))
 ```
+
+12 Course slides 3.229679  
+11 Class recordings 3.250000  
+15 Classroom is comfortable 3.286374  
+
 </small>
 
 
@@ -250,7 +259,7 @@ kable(rating.df[18:33,], row.names = F)
 </small>
 
 Communicates Effectively = 0.85  
-Cares about my success = 0.89  
+Cares about my success = 0.87  
 Course slides = 0.87  
 Guidance on enrollment options = 0.89  
 
@@ -270,7 +279,7 @@ cat('Adjusted R^2', summary(model1)$adj.r.squared)
 
 
 ***
-<small style="font-size:.75em">
+<small style="font-size:.55em">
 ```{r model 1 coef, warning = FALSE, message = FALSE, results = 'asis', quietly = TRUE, echo = FALSE}
 coef.df <- data.frame(summary(model1)$coefficients[,c(1,4)])
 names(coef.df) <- c('Coefficient', 'P-Value')
@@ -450,3 +459,8 @@ for(curr.col in c(18, 23)){
   print(kable(joined.df, row.names = FALSE))
 }
 ```
+
+Questions?
+========================================================
+
+Thank you

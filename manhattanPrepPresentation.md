@@ -9,7 +9,8 @@ height: 900
 Getting started
 ========================================================
 
-R used for the load-in and analysis. All files (including this one) are on https://github.com/pagchomp/manhattanPrep
+R used for the load-in and analysis.  
+All files (including this one) are on https://github.com/pagchomp/manhattanPrep
 <small style="font-size:.3em">
 
 ```r
@@ -67,21 +68,21 @@ write.csv(ms.df, paste0(folder, "meanScores.csv"), row.names = F)
 Means Exploration
 ========================================================
 
-How would you rate your overall learning experience with Manhattan Prep? MEAN: 3.63 
+How would you rate your overall learning experience with Manhattan Prep? <br> Mean: <b>3.63</b> 
 
 
 |  1|  2|   3|   4|  NA|
 |--:|--:|---:|---:|---:|
 |  8| 37| 311| 755| 248|
  
-Knows [Test] content MEAN: 3.92 
+Knows [Test] content <br> Mean: <b>3.92</b> 
 
 
 |  1|  2|  3|    4| NA|
 |--:|--:|--:|----:|--:|
 |  1|  3| 91| 1226| 38|
  
-Is engaging MEAN: 3.81 
+Is engaging <br> Mean: <b>3.81</b> 
 
 
 |  1|  2|   3|    4| NA|
@@ -91,7 +92,7 @@ Is engaging MEAN: 3.81
 
 Mean Scores for Each Question
 ========================================================
-<small style="font-size:.5em">
+<small style="font-size:.7em">
 
 
 |   |Question                                                                 |     Mean|
@@ -114,9 +115,12 @@ Mean Scores for Each Question
 |17 |Overall ease of enrollment                                               | 3.697173|
 |18 |Guidance on enrollment options                                           | 3.452167|
 
+3 Knows [Test] content 3.924300  
+7 Is enthusiastic 3.853899  
+27 Knows GMAT content(co) 3.8495575  
+
 ***
 
-<br>
 <br>
 <br>
 
@@ -139,6 +143,11 @@ Mean Scores for Each Question
 |32 |Cares about my success(co)                                                       | 3.6615044|
 |33 |How would you rate [InstructorFirstName]'s teaching overall?(co)                 | 3.7256637|
 |34 |Would you recommend [InstructorFirstName]? (co)                                  | 3.7101770|
+
+12 Course slides 3.229679  
+11 Class recordings 3.250000  
+15 Classroom is comfortable 3.286374  
+
 </small>
 
 
@@ -279,7 +288,7 @@ High and Low scores
 </small>
 
 Communicates Effectively = 0.85  
-Cares about my success = 0.89  
+Cares about my success = 0.87  
 Course slides = 0.87  
 Guidance on enrollment options = 0.89  
 
@@ -292,7 +301,7 @@ R^2 0.4617748 <br>Adjusted R^2 0.4441693
 
 
 ***
-<small style="font-size:.75em">
+<small style="font-size:.55em">
 
 |                                                | Coefficient| P-Value|
 |:-----------------------------------------------|-----------:|-------:|
@@ -468,3 +477,8 @@ Net Promoter Score Individual Questions Continued
 |3   |109       |16.17    |126       |43.9     |13        |33.33    |
 |4   |564       |83.68    |147       |51.22    |15        |38.46    |
 |SUM |674       |100      |287       |100      |39        |100      |
+
+Questions?
+========================================================
+
+Thank you
